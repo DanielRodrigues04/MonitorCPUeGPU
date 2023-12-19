@@ -76,3 +76,4 @@ screen.key(['q', 'C-c'], () => {
 });
 
 screen.render();
+
