@@ -2,6 +2,10 @@
   "dependencies": {
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.11.0",
+    "detect-gpu": "^5.0.37",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
+    "os-utils": "^0.0.14",
     "systeminformation": "^5.21.20"
   },
   "name": "monitorcpuegpu",
