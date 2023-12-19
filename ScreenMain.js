@@ -1,6 +1,6 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
-const si = require('systeminformation');
+const fetch = require('node-fetch');
 
 const screen = blessed.screen();
 
@@ -11,7 +11,7 @@ const tableCPU = grid.set(0, 0, 1, 1, contrib.table, {
   keys: true,
   fg: 'white',
   selectedFg: 'white',
-  selectedBg: 'green', // Alteração na cor de fundo para verde
+  selectedBg: 'green',
   interactive: true,
   width: '100%',
   height: '50%',
@@ -36,49 +36,39 @@ const tableGPU = grid.set(0, 1, 1, 1, contrib.table, {
 
 const updateSystemInfo = async () => {
   try {
-    const cpuData = await si.cpu();
-    const cpuSpeed = await si.cpuCurrentspeed();
-    const cpuTemp = await si.cpuTemperature();
-    
-    const cpuInfo = [
-      ['Nome', cpuData.manufacturer ? `${cpuData.manufacturer} ${cpuData.brand}` : 'N/A'],
-      ['Velocidade', cpuSpeed.avg ? `${cpuSpeed.avg} GHz` : 'N/A'],
-      ['Temperatura', cpuTemp.main ? `${cpuTemp.main} °C` : 'N/A'],
-    ];
+    const responseCPU = await fetch('http://localhost:3000/info/cpu');
+    const cpuData = await responseCPU.json();
 
-    const gpuData = await si.graphics();
-    let gpuInfo = [['Nome', 'N/A']];
+    let gpuData = { gpuInfo: {} };
 
-    if (gpuData.controllers && gpuData.controllers.length > 0 && gpuData.controllers[0].model) {
-      gpuInfo = [['Nome', gpuData.controllers[0].model]];
+    const responseGPU = await fetch('http://localhost:3000/info/amd-gpu');
+    const rawData = await responseGPU.json();
+
+    if (rawData && rawData.gpuInfo) {
+      gpuData = rawData;
     }
 
-    // Verificação adicional para validar os dados antes de atualizar as tabelas
-    const isCPUDataValid = cpuInfo.every(row => row.every(cell => (typeof cell === 'string')));
-    const isGPUDataValid = gpuInfo.every(row => row.every(cell => (typeof cell === 'string')));
-
-    if (isCPUDataValid && cpuInfo.length > 0) {
-      tableCPU.setData({ headers: ['Atributo', 'Valor'], data: cpuInfo });
+    if (cpuData && cpuData.cpuInfo) {
+      const cpuInfoFormatted = Object.entries(cpuData.cpuInfo).map(([key, value]) => [key, value]);
+      tableCPU.setData({ headers: ['Atributo', 'Valor'], data: cpuInfoFormatted });
     } else {
-      throw new Error('Dados inválidos da CPU');
+      tableCPU.setData({ headers: ['Atributo', 'Valor'], data: [['N/A', 'N/A']] });
     }
 
-    if (isGPUDataValid && gpuInfo.length > 0) {
-      tableGPU.setData({ headers: ['Atributo', 'Valor'], data: gpuInfo });
+    if (gpuData.gpuInfo && Object.keys(gpuData.gpuInfo).length > 0) {
+      const gpuInfoFormatted = Object.entries(gpuData.gpuInfo).map(([key, value]) => [key, value]);
+      tableGPU.setData({ headers: ['Atributo', 'Valor'], data: gpuInfoFormatted });
     } else {
-      throw new Error('Dados inválidos da GPU');
+      tableGPU.setData({ headers: ['Atributo', 'Valor'], data: [['N/A', 'N/A']] });
     }
 
     screen.render();
   } catch (error) {
-    tableCPU.setData({ headers: ['Erro ao obter informações'] });
-    tableGPU.setData({ headers: ['Erro ao obter informações'] });
-    screen.render();
+    console.error('Erro:', error);
   }
 };
 
-
-
+setInterval(updateSystemInfo, 2000);
 updateSystemInfo();
 
 screen.key(['q', 'C-c'], () => {
@@ -86,3 +76,4 @@ screen.key(['q', 'C-c'], () => {
 });
 
 screen.render();
+
