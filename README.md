@@ -17,4 +17,5 @@ Certifique-se de ter os seguintes frameworks e bibliotecas instalados:
 - [Systeminformation](https://www.npmjs.com/package/systeminformation): Biblioteca para obter informações do sistema.
 
 ## Como Usar
-## ...under development
+#
+Em Desenvolvimento...
