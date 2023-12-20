@@ -10,7 +10,7 @@ Este projeto consiste em um monitor simples de CPU e GPU utilizando Node.js, Ble
 
 ## Frameworks Necessários
 
-Certifique-se de ter os seguintes frameworks e bibliotecas instalados:
+Certifique-se de ter os seguintes frameworks e bibliotecas instalados :
 
 - [Node.js](https://nodejs.org/): Plataforma JavaScript para executar aplicativos do lado do servidor.
 - [Blessed](https://www.npmjs.com/package/blessed): Biblioteca para criar interfaces de linha de comando (CLI) com Node.js.
